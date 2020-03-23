@@ -19,6 +19,9 @@ export interface ThunkFn {
   (sel: string, key: any, fn: Function, args: any[]): Thunk
 }
 
+// 这个方法会让不是thunk的vnode也变成thunk,在prepatch就会触发变更
+// 此时，除了两个vnode的指针不一样，他的属性上的变量或者指针都一样，
+// 在即将进入复杂的diff算法时，两个children是相同的就不会进入diff算法
 function copyToThunk (vnode: VNode, thunk: VNode): void {
   thunk.elm = vnode.elm;
   (vnode.data as VNodeData).fn = (thunk.data as VNodeData).fn;

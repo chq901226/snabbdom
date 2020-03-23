@@ -156,6 +156,7 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
     return vnode.elm;
   }
 
+  // 依赖于createElm
   function addVnodes(
     parentElm: Node,
     before: Node | null,
@@ -304,6 +305,14 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
       }
     }
     // 循环之后
+    
+    /**
+     *  old          new
+     * [div,span] [div,span] oldStartIdx = 2 oldEndIdx = 1 newStartIdx = 2 newEndIdx = 1
+     * [span,div] [div,span] oldStartIdx = 2 oldEndIdx = 1 newStartIdx = 1 newEndIdx = 0
+     * []             [div]  oldStartIdx = 0 oldEndIdx = -1 newStartIdx = 0 newEndIdx = 0
+     * [div]             []  oldStartIdx = 0 oldEndIdx = 0 newStartIdx = 1 newEndIdx = -1
+     */
     if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
       // 在old后面新增的那种情况
       if (oldStartIdx > oldEndIdx) {
@@ -324,7 +333,7 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
     const elm = vnode.elm = oldVnode.elm!;
     const oldCh = oldVnode.children as VNode[];
     const ch = vnode.children as VNode[];
-    // 如果两个节点的指针一致，那么直接返回;这个地方是thunk的精妙所在
+    // 如果两个节点的指针一致，那么直接返回
     if (oldVnode === vnode) return;
     // 处理vnode的data更新，执行每个 modules 的 update hook
     if (vnode.data !== undefined) {
@@ -332,11 +341,13 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
       // 执行当前vnode的update
       vnode.data.hook?.update?.(oldVnode, vnode);
     }
+
     // 再次 比较是否相同
     // 如果没有指定text,说明不是文本节点
     if (isUndef(vnode.text)) {
       // 如果都有孩子，那么更新孩子
       if (isDef(oldCh) && isDef(ch)) {
+        // 这个地方是thunk的精妙所在,不会走进diff算法
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue);
         // 如果vnode有孩子,oldvnode 没有，那vnode新增
       } else if (isDef(ch)) {
