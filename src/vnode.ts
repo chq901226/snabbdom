@@ -33,7 +33,7 @@ export interface VNodeData {
   ns?: string // for SVGs
   fn?: () => VNode // for thunks
   args?: any[] // for thunks
-  [key: string]: any // for any other 3rd party module
+  [key: string]: any // for any other 3rd party module 自己写组件的很有用，比如我们实现一个sy-color的类似指令
 }
 
 export function vnode (sel: string | undefined,

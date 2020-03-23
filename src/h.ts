@@ -27,31 +27,43 @@ export function h (sel: any, b?: any, c?: any): VNode {
   var children: any;
   var text: any;
   var i: number;
+  // 如果有三个参数， 
   if (c !== undefined) {
+    // 如果存在data参数
     if (b !== null) {
       data = b;
     }
+    // 如果第三个参数是一个数组
     if (is.array(c)) {
       children = c;
+      // 如果是一个文本或者数字
     } else if (is.primitive(c)) {
       text = c;
+      // 如果是一个 有效的 vnode，包装成统一格式
     } else if (c && c.sel) {
       children = [c];
     }
+    // 如果只有两个参数
   } else if (b !== undefined && b !== null) {
+    // 如果是数组断定为 children字段
     if (is.array(b)) {
       children = b;
+      // 如果是string 或者 number，断定为 text 文本节点
     } else if (is.primitive(b)) {
       text = b;
+      // 如果是一个有效的vnode,包装成统一格式
     } else if (b && b.sel) {
       children = [b];
     } else { data = b; }
   }
+  
+  // 如果存在子类，上面的方法已经把children 处理成一个数组，如果数组里面的值是string或者number类型，那么生成文本节点
   if (children !== undefined) {
     for (i = 0; i < children.length; ++i) {
       if (is.primitive(children[i])) children[i] = vnode(undefined, undefined, undefined, children[i], undefined);
     }
   }
+  // 处理svg这种情况
   if (
     sel[0] === 's' && sel[1] === 'v' && sel[2] === 'g' &&
     (sel.length === 3 || sel[3] === '.' || sel[3] === '#')
