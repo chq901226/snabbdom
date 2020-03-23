@@ -1,6 +1,11 @@
 import { VNode, VNodeData } from '../vnode';
 import { Module } from './module';
+/***
+ * snabbdom 的 eventlistener 并没有实现事件委托机制
+ * 
+ */
 
+// 声明一种是原生的事件，一个可以是自定义的事件
 export type On = {
   [N in keyof HTMLElementEventMap]?: (ev: HTMLElementEventMap[N]) => void
 } & {
@@ -44,6 +49,7 @@ function handleEvent (event: Event, vnode: VNode) {
 
 function createListener () {
   return function handler (event: Event) {
+    // 将vnode挂载到 listener 的用意
     handleEvent(event, (handler as any).vnode);
   };
 }
@@ -61,6 +67,7 @@ function updateEventListeners (oldVnode: VNode, vnode?: VNode): void {
     return;
   }
 
+  // 可以复用的进行复用，不可以服用的就删除掉；这里主要是删除之前的一些事件
   // remove existing listeners which no longer used
   if (oldOn && oldListener) {
     // if element changed or deleted we remove all existing listeners unconditionally
@@ -78,7 +85,7 @@ function updateEventListeners (oldVnode: VNode, vnode?: VNode): void {
       }
     }
   }
-
+  // 这里是处理新绑定的一些事件，如果存在复用旧的事件，就跳过不再绑定
   // add new listeners which has not already attached
   if (on) {
     // reuse existing listener or create new
